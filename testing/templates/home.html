@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}SQL AI Tutor - запуск теста{% endblock %}
+
+{% block content %}
+<div class="row g-4 align-items-start">
+    <div class="col-lg-5">
+        <div class="mb-4">
+            <span class="badge text-bg-primary mb-3">PostgreSQL · DBeaver · Northwind</span>
+            <h1 class="display-6 fw-semibold mb-3">Интеллектуальное тестирование по SQL</h1>
+            <p class="lead text-secondary mb-0">
+                Локальный Python-агент формирует тест, проверяет ответы и подбирает следующую траекторию обучения.
+            </p>
+        </div>
+
+        <div class="surface p-4">
+            <h2 class="h5 mb-3">Что умеет агент</h2>
+            <div class="d-grid gap-3">
+                <div>
+                    <div class="fw-semibold">Проверка результата</div>
+                    <div class="text-secondary">Считает верные ответы, ошибки и процент выполнения.</div>
+                </div>
+                <div>
+                    <div class="fw-semibold">Рекомендации</div>
+                    <div class="text-secondary">Определяет уровень и предлагает следующую тему.</div>
+                </div>
+                <div>
+                    <div class="fw-semibold">Практика Northwind</div>
+                    <div class="text-secondary">Дает задание для закрепления в учебной базе.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="surface p-4 p-lg-5 shadow-sm">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                <div>
+                    <h2 class="h4 mb-1">Начать тест</h2>
+                    <p class="text-secondary mb-0">Заполните данные и выберите формат прохождения.</p>
+                </div>
+                <a class="btn btn-outline-secondary btn-sm" href="{% url 'statistics' %}">История</a>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label class="form-label" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+                        {{ form.full_name }}
+                        {% for error in form.full_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="{{ form.group_name.id_for_label }}">{{ form.group_name.label }}</label>
+                        {{ form.group_name }}
+                        {% for error in form.group_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.topic.id_for_label }}">{{ form.topic.label }}</label>
+                        {{ form.topic }}
+                        {% for error in form.topic.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6" id="difficulty-block">
+                        <label class="form-label" for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }}</label>
+                        {{ form.difficulty }}
+                        <div class="form-text">{{ form.difficulty.help_text }}</div>
+                        {% for error in form.difficulty.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="form-label d-block">{{ form.mode.label }}</label>
+                    <div class="row g-2">
+                        {% for choice in form.mode %}
+                            <div class="col-md-6">
+                                <label class="surface d-flex gap-3 align-items-start p-3 h-100">
+                                    {{ choice.tag }}
+                                    <span>
+                                        <span class="fw-semibold d-block">{{ choice.choice_label }}</span>
+                                        {% if choice.data.value == "standard" %}
+                                            <span class="text-secondary small">Вы сами выбираете сложность теста.</span>
+                                        {% else %}
+                                            <span class="text-secondary small">Агент подберет сложность и число вопросов по истории.</span>
+                                        {% endif %}
+                                    </span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% for error in form.mode.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+
+                <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">Начать тест</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

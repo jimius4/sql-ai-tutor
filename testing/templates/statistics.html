@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}SQL AI Tutor - статистика{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-2">Статистика тестирования</h1>
+        <p class="text-secondary mb-0">История попыток сохраняется локально в базе SQLite через Django ORM.</p>
+    </div>
+    <a class="btn btn-primary align-self-lg-start" href="{% url 'home' %}">Новый тест</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="surface metric p-4">
+            <div class="text-secondary small">Всего тестов</div>
+            <div class="display-6 fw-semibold">{{ total_tests }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="surface metric p-4">
+            <div class="text-secondary small">Средний балл</div>
+            <div class="display-6 fw-semibold">{{ average_score }}%</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="surface metric p-4">
+            <div class="text-secondary small">Студентов</div>
+            <div class="display-6 fw-semibold">{{ students_count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="surface p-4 h-100">
+            <h2 class="h5 mb-3">Распределение по уровням</h2>
+            {% if level_distribution %}
+                <div class="list-group list-group-flush">
+                    {% for item in level_distribution %}
+                        <div class="list-group-item px-0 d-flex justify-content-between">
+                            <span>{{ item.level }}</span>
+                            <span class="badge text-bg-primary">{{ item.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-secondary mb-0">Пока нет завершенных тестов.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="surface p-4">
+            <h2 class="h5 mb-3">Последние результаты</h2>
+            {% if recent_attempts %}
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Студент</th>
+                            <th>Группа</th>
+                            <th>Тема</th>
+                            <th>Сложность</th>
+                            <th>Балл</th>
+                            <th>Уровень</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for attempt in recent_attempts %}
+                            <tr>
+                                <td>{{ attempt.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ attempt.student_name }}</td>
+                                <td>{{ attempt.group_name }}</td>
+                                <td>{{ attempt.get_topic_display }}</td>
+                                <td>{{ attempt.get_difficulty_display }}</td>
+                                <td class="fw-semibold">{{ attempt.score }}%</td>
+                                <td>{{ attempt.level }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-secondary mb-0">Последних результатов пока нет.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
