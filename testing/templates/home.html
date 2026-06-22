@@ -1,33 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}SQL AI Tutor - запуск теста{% endblock %}
+{% block title %}SQL AI Tutor - ЯЗЫК DML{% endblock %}
 
 {% block content %}
 <div class="row g-4 align-items-start">
     <div class="col-lg-5">
         <div class="mb-4">
-            <span class="badge text-bg-primary mb-3">PostgreSQL · DBeaver · Northwind</span>
-            <h1 class="display-6 fw-semibold mb-3">Интеллектуальное тестирование по SQL</h1>
+            <span class="badge text-bg-primary mb-3">{{ topic_label }}</span>
+            <h1 class="display-6 fw-semibold mb-3">Тестирование по теме «ЯЗЫК DML»</h1>
             <p class="lead text-secondary mb-0">
-                Локальный Python-агент формирует тест, проверяет ответы и подбирает следующую траекторию обучения.
+                Первый тест всегда начинается с легкого уровня. После успешного результата агент переводит студента на следующий уровень.
             </p>
         </div>
 
         <div class="surface p-4">
-            <h2 class="h5 mb-3">Что умеет агент</h2>
+            <h2 class="h5 mb-3">Лестница уровней</h2>
             <div class="d-grid gap-3">
-                <div>
-                    <div class="fw-semibold">Проверка результата</div>
-                    <div class="text-secondary">Считает верные ответы, ошибки и процент выполнения.</div>
+                <div class="d-flex gap-3">
+                    <span class="badge rounded-pill text-bg-success align-self-start">1</span>
+                    <div>
+                        <div class="fw-semibold">Легкий</div>
+                        <div class="text-secondary">Базовые команды SELECT, INSERT, UPDATE, DELETE.</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="fw-semibold">Рекомендации</div>
-                    <div class="text-secondary">Определяет уровень и предлагает следующую тему.</div>
+                <div class="d-flex gap-3">
+                    <span class="badge rounded-pill text-bg-warning align-self-start">2</span>
+                    <div>
+                        <div class="fw-semibold">Средний</div>
+                        <div class="text-secondary">Условия WHERE, группировка и безопасное изменение строк.</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="fw-semibold">Практика Northwind</div>
-                    <div class="text-secondary">Дает задание для закрепления в учебной базе.</div>
+                <div class="d-flex gap-3">
+                    <span class="badge rounded-pill text-bg-danger align-self-start">3</span>
+                    <div>
+                        <div class="fw-semibold">Сложный</div>
+                        <div class="text-secondary">Подзапросы, транзакции и массовые DML-операции.</div>
+                    </div>
                 </div>
+            </div>
+            <div class="alert alert-light border mt-4 mb-0">
+                Проходной порог для перехода дальше: {{ pass_percent }}%.
             </div>
         </div>
     </div>
@@ -37,7 +49,7 @@
             <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
                 <div>
                     <h2 class="h4 mb-1">Начать тест</h2>
-                    <p class="text-secondary mb-0">Заполните данные и выберите формат прохождения.</p>
+                    <p class="text-secondary mb-0">Агент сам назначит уровень по вашей истории прохождения.</p>
                 </div>
                 <a class="btn btn-outline-secondary btn-sm" href="{% url 'statistics' %}">История</a>
             </div>
@@ -60,39 +72,11 @@
                         {{ form.group_name }}
                         {% for error in form.group_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="{{ form.topic.id_for_label }}">{{ form.topic.label }}</label>
-                        {{ form.topic }}
-                        {% for error in form.topic.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-                    </div>
-                    <div class="col-md-6" id="difficulty-block">
-                        <label class="form-label" for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }}</label>
-                        {{ form.difficulty }}
-                        <div class="form-text">{{ form.difficulty.help_text }}</div>
-                        {% for error in form.difficulty.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-                    </div>
                 </div>
 
-                <div class="mt-4">
-                    <label class="form-label d-block">{{ form.mode.label }}</label>
-                    <div class="row g-2">
-                        {% for choice in form.mode %}
-                            <div class="col-md-6">
-                                <label class="surface d-flex gap-3 align-items-start p-3 h-100">
-                                    {{ choice.tag }}
-                                    <span>
-                                        <span class="fw-semibold d-block">{{ choice.choice_label }}</span>
-                                        {% if choice.data.value == "standard" %}
-                                            <span class="text-secondary small">Вы сами выбираете сложность теста.</span>
-                                        {% else %}
-                                            <span class="text-secondary small">Агент подберет сложность и число вопросов по истории.</span>
-                                        {% endif %}
-                                    </span>
-                                </label>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% for error in form.mode.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                <div class="surface p-3 mt-4 bg-light">
+                    <div class="text-secondary small">Тема</div>
+                    <div class="fw-semibold">{{ topic_label }}</div>
                 </div>
 
                 <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">Начать тест</button>

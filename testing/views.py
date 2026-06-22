@@ -8,6 +8,7 @@ from .forms import StartTestForm
 from .models import TestAttempt
 from .question_generator import (
     DIFFICULTY_LABELS,
+    TOPIC_DML,
     TOPIC_LABELS,
     check_answers,
     generate_test,
@@ -20,47 +21,40 @@ def home(request):
 
         if form.is_valid():
             agent = SQLTutorAgent()
-            full_name = form.cleaned_data["full_name"].strip()
+            student_name = form.cleaned_data["full_name"].strip()
             group_name = form.cleaned_data["group_name"].strip()
-            topic = form.cleaned_data["topic"]
-            mode = form.cleaned_data["mode"]
-            difficulty = form.cleaned_data["difficulty"]
-            agent_plan = None
+            topic = TOPIC_DML
 
-            if mode == "agent":
-                last_attempt = (
-                    TestAttempt.objects.filter(
-                        student_name__iexact=full_name,
-                        group_name__iexact=group_name,
-                        topic=topic,
-                    )
-                    .order_by("-created_at")
-                    .first()
+            last_attempt = (
+                TestAttempt.objects.filter(
+                    student_name__iexact=student_name,
+                    group_name__iexact=group_name,
+                    topic=topic,
                 )
-                previous_score = last_attempt.score if last_attempt else None
-                agent_plan = agent.plan_test(previous_score)
-                difficulty = agent_plan["difficulty"]
-                question_count = agent_plan["questions_count"]
-            else:
-                question_count = agent.question_count_for_difficulty(difficulty)
-
+                .order_by("-created_at")
+                .first()
+            )
+            agent_plan = agent.plan_test(last_attempt)
+            difficulty = agent_plan["difficulty"]
+            question_count = agent_plan["questions_count"]
             questions = generate_test(topic, difficulty, question_count)
 
             if not questions:
-                form.add_error(None, "Для выбранной темы пока нет вопросов.")
+                form.add_error(None, "Для темы «ЯЗЫК DML» пока нет вопросов.")
             else:
                 request.session["current_questions"] = questions
                 request.session["current_test"] = {
-                    "student_name": full_name,
+                    "student_name": student_name,
                     "group_name": group_name,
                     "topic": topic,
-                    "topic_label": TOPIC_LABELS.get(topic, topic),
+                    "topic_label": TOPIC_LABELS[topic],
                     "difficulty": difficulty,
-                    "difficulty_label": DIFFICULTY_LABELS.get(difficulty, difficulty),
-                    "mode": mode,
-                    "mode_label": "ИИ-агент" if mode == "agent" else "Стандартный тест",
+                    "difficulty_label": DIFFICULTY_LABELS[difficulty],
+                    "mode": "agent",
+                    "mode_label": "ИИ-агент",
                     "agent_plan": agent_plan,
                     "question_count": len(questions),
+                    "pass_percent": agent.PASS_PERCENT,
                 }
 
                 return render(
@@ -74,7 +68,15 @@ def home(request):
     else:
         form = StartTestForm()
 
-    return render(request, "home.html", {"form": form})
+    return render(
+        request,
+        "home.html",
+        {
+            "form": form,
+            "topic_label": TOPIC_LABELS[TOPIC_DML],
+            "pass_percent": SQLTutorAgent.PASS_PERCENT,
+        },
+    )
 
 
 @require_POST
@@ -88,7 +90,10 @@ def finish_test(request):
 
     result = check_answers(request.POST, questions)
     agent = SQLTutorAgent()
-    report = agent.create_learning_report(result["score_percent"])
+    report = agent.create_learning_report(
+        result["score_percent"],
+        current_difficulty=test_info["difficulty"],
+    )
 
     attempt = TestAttempt.objects.create(
         student_name=test_info["student_name"],
@@ -141,7 +146,7 @@ def statistics(request):
 
 def demo_agent(request):
     agent = SQLTutorAgent()
-    report = agent.create_learning_report(72)
+    report = agent.create_learning_report(72, current_difficulty="easy")
 
     return render(
         request,
@@ -151,9 +156,10 @@ def demo_agent(request):
             "test_info": {
                 "student_name": "Демо-студент",
                 "group_name": "Демо",
-                "topic_label": "PostgreSQL",
-                "difficulty_label": "Средний",
+                "topic_label": "ЯЗЫК DML",
+                "difficulty_label": "Легкий",
                 "mode_label": "ИИ-агент",
+                "pass_percent": agent.PASS_PERCENT,
             },
             "result": {
                 "total": 0,

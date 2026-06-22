@@ -2,9 +2,7 @@ from django.db import models
 
 
 TOPIC_CHOICES = [
-    ("postgresql", "PostgreSQL"),
-    ("dbeaver", "DBeaver"),
-    ("northwind", "Northwind"),
+    ("dml", "ЯЗЫК DML"),
 ]
 
 DIFFICULTY_CHOICES = [
