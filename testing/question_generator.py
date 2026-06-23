@@ -2,6 +2,7 @@ import random
 
 
 TOPIC_DML = "dml"
+ANSWER_LETTERS = ["А", "Б", "В", "Г"]
 
 TOPIC_LABELS = {
     TOPIC_DML: "ЯЗЫК DML",
@@ -14,7 +15,7 @@ DIFFICULTY_LABELS = {
 }
 
 
-def make_question(question, answers, correct, explanation):
+def make_question(question, answers, correct, explanation=""):
     return {
         "question": question,
         "answers": answers,
@@ -28,73 +29,85 @@ QUESTION_BANK = {
         "easy": [
             make_question(
                 "Что означает DML в SQL?",
-                [
-                    "Data Manipulation Language",
-                    "Database Migration List",
-                    "Data Module Loader",
-                    "Digital Markup Language",
-                ],
+                ["Data Manipulation Language", "Database Migration List", "Data Module Loader", "Digital Markup Language"],
                 0,
-                "DML означает язык манипулирования данными: команды для чтения и изменения строк.",
             ),
             make_question(
                 "Какая команда DML используется для получения данных из таблицы?",
                 ["SELECT", "CREATE", "DROP", "ALTER"],
                 0,
-                "SELECT выбирает данные из одной или нескольких таблиц.",
             ),
             make_question(
                 "Какая команда DML добавляет новую строку в таблицу?",
                 ["INSERT", "UPDATE", "DELETE", "TRUNCATE"],
                 0,
-                "INSERT INTO добавляет новые записи в таблицу.",
-            ),
-            make_question(
-                "Для чего в DML-запросах используется WHERE?",
-                [
-                    "Для ограничения строк по условию",
-                    "Для создания новой таблицы",
-                    "Для изменения имени базы данных",
-                    "Для выдачи прав пользователю",
-                ],
-                0,
-                "WHERE задает условие и помогает работать только с нужными строками.",
             ),
             make_question(
                 "Какая команда DML изменяет значения в существующих строках?",
                 ["UPDATE", "SELECT", "INSERT", "CREATE"],
                 0,
-                "UPDATE меняет значения в строках, которые подходят под условие.",
             ),
             make_question(
                 "Какая команда DML удаляет строки из таблицы?",
                 ["DELETE", "ALTER", "CREATE", "GRANT"],
                 0,
-                "DELETE удаляет строки, обычно вместе с условием WHERE.",
+            ),
+            make_question(
+                "Для чего в DML-запросах используется WHERE?",
+                ["Для ограничения строк по условию", "Для создания таблицы", "Для выдачи прав", "Для удаления базы данных"],
+                0,
+            ),
+            make_question(
+                "Какая часть запроса SELECT указывает таблицу-источник?",
+                ["FROM", "VALUES", "SET", "COMMIT"],
+                0,
+            ),
+            make_question(
+                "Что делает ORDER BY в SELECT-запросе?",
+                ["Сортирует результат", "Удаляет строки", "Добавляет строки", "Откатывает транзакцию"],
+                0,
+            ),
+            make_question(
+                "Что делает LIMIT в SELECT-запросе?",
+                ["Ограничивает количество строк результата", "Создает ограничение таблицы", "Удаляет лишние столбцы", "Меняет тип данных"],
+                0,
+            ),
+            make_question(
+                "Какая запись корректно проверяет отсутствие значения?",
+                ["IS NULL", "= NULL", "LIKE NULL", "IN NULL"],
+                0,
+            ),
+            make_question(
+                "Какая команда фиксирует изменения транзакции?",
+                ["COMMIT", "ROLLBACK", "SELECT", "WHERE"],
+                0,
+            ),
+            make_question(
+                "Какая команда отменяет изменения незавершенной транзакции?",
+                ["ROLLBACK", "COMMIT", "INSERT", "ORDER BY"],
+                0,
             ),
             make_question(
                 "Что безопаснее сделать перед UPDATE или DELETE?",
-                [
-                    "Выполнить SELECT с тем же WHERE и проверить строки",
-                    "Сразу выполнить запрос без условия",
-                    "Удалить таблицу",
-                    "Отключить базу данных",
-                ],
+                ["Выполнить SELECT с тем же WHERE", "Сразу выполнить запрос без WHERE", "Удалить таблицу", "Отключить базу"],
                 0,
-                "Проверочный SELECT помогает убедиться, что условие выбрало правильные строки.",
+            ),
+            make_question(
+                "Какая команда DML работает с уже существующими строками, а не со структурой таблицы?",
+                ["UPDATE", "ALTER", "CREATE", "DROP"],
+                0,
+            ),
+            make_question(
+                "Какая команда НЕ относится к DML?",
+                ["CREATE TABLE", "SELECT", "INSERT", "DELETE"],
+                0,
             ),
         ],
         "medium": [
             make_question(
-                "Что произойдет при UPDATE table SET status = 'done' без WHERE?",
-                [
-                    "Изменятся все строки таблицы",
-                    "Изменится только первая строка",
-                    "Запрос всегда отменится",
-                    "Создастся новая таблица",
-                ],
+                "Что произойдет при UPDATE students SET group_name = 'ИС-22' без WHERE?",
+                ["Изменятся все строки таблицы", "Изменится только первая строка", "Запрос создаст новую таблицу", "Запрос станет SELECT-запросом"],
                 0,
-                "Без WHERE команда UPDATE применяется ко всем строкам таблицы.",
             ),
             make_question(
                 "Какой запрос корректно добавляет строку в таблицу students?",
@@ -105,7 +118,6 @@ QUESTION_BANK = {
                     "CREATE ROW students ('Анна', 'ИС-21');",
                 ],
                 0,
-                "INSERT INTO указывает таблицу, столбцы и значения новой строки.",
             ),
             make_question(
                 "Какой запрос безопасно меняет группу только у студента с id = 5?",
@@ -116,35 +128,21 @@ QUESTION_BANK = {
                     "ALTER students SET group_name = 'ИС-22' WHERE id = 5;",
                 ],
                 0,
-                "Точное условие WHERE ограничивает изменение одной нужной строкой.",
             ),
             make_question(
                 "Какой запрос удаляет только тестовую запись с id = 10?",
-                [
-                    "DELETE FROM students WHERE id = 10;",
-                    "DELETE students id = 10;",
-                    "DROP FROM students WHERE id = 10;",
-                    "REMOVE TABLE students WHERE id = 10;",
-                ],
+                ["DELETE FROM students WHERE id = 10;", "DELETE students id = 10;", "DROP FROM students WHERE id = 10;", "REMOVE TABLE students WHERE id = 10;"],
                 0,
-                "DELETE FROM удаляет строки из таблицы по заданному условию.",
             ),
             make_question(
                 "Какая агрегатная функция считает количество строк?",
                 ["COUNT(*)", "SUM(*)", "AVG(*)", "ORDER(*)"],
                 0,
-                "COUNT(*) возвращает количество строк в результате или группе.",
             ),
             make_question(
-                "Для чего используется GROUP BY в DML-запросе SELECT?",
-                [
-                    "Для группировки строк перед подсчетом агрегатов",
-                    "Для удаления строк",
-                    "Для добавления столбца",
-                    "Для отката транзакции",
-                ],
+                "Для чего используется GROUP BY в SELECT?",
+                ["Для группировки строк перед подсчетом агрегатов", "Для удаления строк", "Для добавления столбца", "Для отката транзакции"],
                 0,
-                "GROUP BY нужен, чтобы считать агрегаты отдельно по группам.",
             ),
             make_question(
                 "Какой запрос выбирает товары дороже 100 и сортирует их по цене?",
@@ -155,48 +153,63 @@ QUESTION_BANK = {
                     "DELETE * FROM products WHERE price > 100 ORDER BY price;",
                 ],
                 0,
-                "WHERE фильтрует строки, а ORDER BY сортирует результат.",
             ),
             make_question(
                 "Как проверить результат INSERT?",
+                ["Выполнить SELECT с условием, которое находит добавленную строку", "Сразу выполнить DROP TABLE", "Отключить соединение", "Изменить имя базы"],
+                0,
+            ),
+            make_question(
+                "Где нужно писать условие по агрегатной функции COUNT(*)?",
+                ["HAVING", "WHERE", "VALUES", "SET"],
+                0,
+            ),
+            make_question(
+                "Какой запрос найдет группы, где больше пяти студентов?",
                 [
-                    "Выполнить SELECT с условием, которое находит добавленную строку",
-                    "Сразу выполнить DROP TABLE",
-                    "Отключить соединение",
-                    "Изменить имя базы данных",
+                    "SELECT group_name, COUNT(*) FROM students GROUP BY group_name HAVING COUNT(*) > 5;",
+                    "SELECT group_name FROM students WHERE COUNT(*) > 5;",
+                    "DELETE FROM students GROUP BY group_name;",
+                    "INSERT INTO students GROUP BY group_name HAVING COUNT(*) > 5;",
                 ],
                 0,
-                "После INSERT результат удобно проверить SELECT-запросом.",
+            ),
+            make_question(
+                "В каком порядке безопаснее выполнять удаление строк?",
+                ["SELECT для проверки, затем DELETE с тем же WHERE", "DELETE без проверки, затем SELECT", "DROP TABLE, затем SELECT", "COMMIT, затем WHERE"],
+                0,
+            ),
+            make_question(
+                "Что делает DISTINCT в SELECT?",
+                ["Убирает повторяющиеся значения из результата", "Удаляет строки из таблицы", "Добавляет новую строку", "Откатывает транзакцию"],
+                0,
+            ),
+            make_question(
+                "Какой оператор проверяет попадание значения в список?",
+                ["IN", "BETWEEN", "LIKE", "IS NULL"],
+                0,
+            ),
+            make_question(
+                "Какой оператор проверяет диапазон значений?",
+                ["BETWEEN", "IN", "LIKE", "IS NOT NULL"],
+                0,
+            ),
+            make_question(
+                "В каком фрагменте UPDATE правильно указано новое значение столбца?",
+                ["SET status = 'done'", "VALUES status = 'done'", "FROM status = 'done'", "ORDER status = 'done'"],
+                0,
             ),
         ],
         "hard": [
             make_question(
                 "Для чего используется INSERT INTO ... SELECT?",
-                [
-                    "Чтобы вставить строки, выбранные другим SELECT-запросом",
-                    "Чтобы удалить строки по условию",
-                    "Чтобы создать индекс",
-                    "Чтобы переименовать таблицу",
-                ],
+                ["Чтобы вставить строки, выбранные другим SELECT-запросом", "Чтобы удалить строки по условию", "Чтобы создать индекс", "Чтобы переименовать таблицу"],
                 0,
-                "INSERT INTO ... SELECT переносит или копирует результат выборки в другую таблицу.",
             ),
             make_question(
                 "Что делает транзакция при выполнении нескольких DML-команд?",
-                [
-                    "Позволяет подтвердить все изменения вместе или откатить их",
-                    "Всегда ускоряет любой SELECT",
-                    "Автоматически создает новую схему",
-                    "Запрещает использовать WHERE",
-                ],
+                ["Позволяет подтвердить все изменения вместе или откатить их", "Всегда ускоряет любой SELECT", "Создает новую схему", "Запрещает WHERE"],
                 0,
-                "Транзакция объединяет изменения и дает возможность COMMIT или ROLLBACK.",
-            ),
-            make_question(
-                "Какой оператор откатывает изменения текущей транзакции?",
-                ["ROLLBACK", "COMMIT", "INSERT", "GROUP BY"],
-                0,
-                "ROLLBACK отменяет изменения, сделанные в незавершенной транзакции.",
             ),
             make_question(
                 "Какой запрос обновляет цену товаров выбранной категории через подзапрос?",
@@ -207,7 +220,6 @@ QUESTION_BANK = {
                     "DELETE products IN categories;",
                 ],
                 0,
-                "Подзапрос в WHERE помогает выбрать строки на основе данных другой таблицы.",
             ),
             make_question(
                 "Как корректно удалить заказы со статусом 'draft', предварительно проверив строки?",
@@ -218,74 +230,112 @@ QUESTION_BANK = {
                     "UPDATE orders SET status = 'draft';",
                 ],
                 0,
-                "Перед DELETE важно увидеть строки, которые попадут под то же условие.",
             ),
             make_question(
                 "Какой вариант лучше для массового изменения важных данных?",
-                [
-                    "Использовать транзакцию, точное WHERE и предварительный SELECT",
-                    "Выполнить UPDATE без проверки",
-                    "Удалить ограничения таблицы",
-                    "Отключить журналирование запросов",
-                ],
+                ["Использовать транзакцию, точное WHERE и предварительный SELECT", "Выполнить UPDATE без проверки", "Удалить ограничения таблицы", "Отключить журналирование"],
                 0,
-                "Транзакция и проверка условия снижают риск испортить много строк.",
             ),
             make_question(
                 "Что делает HAVING в SELECT с GROUP BY?",
-                [
-                    "Фильтрует группы после агрегирования",
-                    "Фильтрует строки до группировки",
-                    "Добавляет новую строку",
-                    "Удаляет таблицу",
-                ],
+                ["Фильтрует группы после агрегирования", "Фильтрует строки до группировки", "Добавляет новую строку", "Удаляет таблицу"],
                 0,
-                "HAVING применяется к сгруппированным данным и агрегатам.",
             ),
             make_question(
-                "Какой запрос найдет группы, где больше 5 студентов?",
-                [
-                    "SELECT group_name, COUNT(*) FROM students GROUP BY group_name HAVING COUNT(*) > 5;",
-                    "SELECT group_name FROM students WHERE COUNT(*) > 5;",
-                    "DELETE FROM students GROUP BY group_name;",
-                    "INSERT INTO students GROUP BY group_name HAVING COUNT(*) > 5;",
-                ],
+                "Что означает идемпотентность учебного DML-скрипта?",
+                ["Повторный запуск не портит данные и не создает неожиданные дубли", "Запрос работает только без WHERE", "Запрос удаляет все строки", "SELECT меняет данные"],
                 0,
-                "Условие по COUNT(*) после группировки пишется в HAVING.",
-            ),
-            make_question(
-                "Что означает идемпотентность в контексте учебных DML-скриптов?",
-                [
-                    "Повторный запуск не должен портить данные или создавать неожиданные дубли",
-                    "Запрос обязан работать только без WHERE",
-                    "Запрос должен удалять все строки",
-                    "SELECT должен менять данные",
-                ],
-                0,
-                "Для учебных скриптов полезно писать условия так, чтобы повторный запуск был безопасным.",
             ),
             make_question(
                 "Какой подход помогает избежать дублей при INSERT тестовой строки?",
+                ["Проверить существование строки через NOT EXISTS или уникальный ключ", "Выполнять INSERT много раз подряд", "Удалить первичный ключ", "Использовать DELETE без WHERE"],
+                0,
+            ),
+            make_question(
+                "Какой запрос переносит активных студентов в архивную таблицу?",
                 [
-                    "Проверить существование строки условием NOT EXISTS или уникальным ключом",
-                    "Выполнять INSERT много раз подряд",
-                    "Удалить первичный ключ",
-                    "Использовать DELETE без WHERE",
+                    "INSERT INTO archive_students SELECT * FROM students WHERE active = true;",
+                    "UPDATE archive_students SELECT active FROM students;",
+                    "DELETE INTO archive_students FROM students;",
+                    "CREATE INTO archive_students WHERE active = true;",
                 ],
                 0,
-                "Проверка существования и ограничения уникальности защищают от повторных вставок.",
+            ),
+            make_question(
+                "Как найти ошибку в DELETE FROM orders; для удаления черновиков?",
+                ["Не указано условие WHERE status = 'draft'", "Нельзя удалять из таблицы orders", "Нужно заменить DELETE на SELECT", "Нужно добавить ORDER BY"],
+                0,
+            ),
+            make_question(
+                "Какой фрагмент защищает UPDATE от изменения лишних строк?",
+                ["WHERE id IN (SELECT student_id FROM exam_results WHERE score < 61)", "ORDER BY id", "LIMIT без условия", "SELECT *"],
+                0,
+            ),
+            make_question(
+                "Что лучше сделать после ROLLBACK?",
+                ["Проверить данные SELECT-запросом и исправить условие", "Повторить тот же ошибочный UPDATE", "Удалить таблицу", "Отключить WHERE"],
+                0,
+            ),
+            make_question(
+                "Какой сценарий лучше всего подходит для транзакции?",
+                ["Несколько связанных INSERT/UPDATE/DELETE, которые должны выполниться вместе", "Один SELECT без условий", "Просмотр структуры таблицы", "Смена темы интерфейса"],
+                0,
+            ),
+            make_question(
+                "Как применить DML с подзапросом для анализа результата?",
+                ["Сначала проверить подзапрос отдельно, затем использовать его в WHERE", "Сразу выполнить DELETE без просмотра", "Заменить подзапрос на DROP", "Не использовать SELECT"],
+                0,
+            ),
+            make_question(
+                "Что нужно сделать перед COMMIT после массового UPDATE?",
+                ["Проверить измененные строки SELECT-запросом внутри транзакции", "Сразу закрыть подключение", "Удалить журнал запросов", "Выполнить DROP DATABASE"],
+                0,
             ),
         ],
     },
 }
 
 
-def generate_test(topic, level, question_count=None):
+def _prepare_question(question, target_correct_index):
+    correct_answer = question["answers"][question["correct"]]
+    wrong_answers = [
+        answer
+        for index, answer in enumerate(question["answers"])
+        if index != question["correct"]
+    ]
+    random.shuffle(wrong_answers)
+    answers = wrong_answers[:]
+    answers.insert(target_correct_index, correct_answer)
+
+    prepared = {
+        **question,
+        "answers": answers,
+        "correct": target_correct_index,
+    }
+    prepared["options"] = [
+        {
+            "index": index,
+            "letter": ANSWER_LETTERS[index],
+            "text": answer,
+        }
+        for index, answer in enumerate(answers)
+    ]
+    return prepared
+
+
+def generate_test(topic, level, question_count=15):
     topic_questions = QUESTION_BANK.get(topic) or QUESTION_BANK[TOPIC_DML]
     questions = topic_questions.get(level, topic_questions["easy"])
+    count = min(question_count, len(questions))
+    selected_questions = random.sample(questions, count)
 
-    count = question_count or len(questions)
-    return random.sample(questions, min(count, len(questions)))
+    target_indexes = [index % len(ANSWER_LETTERS) for index in range(count)]
+    random.shuffle(target_indexes)
+
+    return [
+        _prepare_question(question, target_indexes[index])
+        for index, question in enumerate(selected_questions)
+    ]
 
 
 def check_answers(user_answers, questions):
@@ -309,13 +359,8 @@ def check_answers(user_answers, questions):
             {
                 "number": index + 1,
                 "question": question["question"],
-                "answers": question["answers"],
                 "selected_index": selected_index,
-                "selected_answer": question["answers"][selected_index] if selected_index is not None else "Ответ не выбран",
-                "correct_index": correct_index,
-                "correct_answer": question["answers"][correct_index],
                 "is_correct": is_correct,
-                "explanation": question.get("explanation", ""),
             }
         )
 

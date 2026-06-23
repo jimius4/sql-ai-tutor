@@ -15,49 +15,61 @@
             <span class="badge text-bg-light border">{{ test_info.topic_label }}</span>
             <span class="badge text-bg-light border">Уровень: {{ test_info.difficulty_label }}</span>
             <span class="badge text-bg-primary">{{ test_info.mode_label }}</span>
-            <span class="badge text-bg-secondary">{{ test_info.question_count }} вопросов</span>
+            <span class="badge text-bg-secondary">Попытка {{ test_info.attempt_number }}</span>
+            <span class="badge text-bg-secondary">{{ test_info.duration_minutes }} минут</span>
         </div>
     </div>
 
-    <div class="alert alert-primary mt-4 mb-0">
+    <div class="alert alert-primary mt-4 mb-3">
         {{ test_info.agent_plan.reason }}
-        Для перехода на следующий уровень нужно набрать минимум {{ test_info.pass_percent }}%.
+        Для успешного прохождения нужно набрать не менее {{ test_info.pass_percent }}%
+        (примерно {{ test_info.passing_question_count }} правильных ответов из {{ test_info.question_count }}).
+    </div>
+
+    <div class="d-flex justify-content-between small text-secondary mb-2">
+        <span>Вопрос {{ question_number }} из {{ test_info.question_count }}</span>
+        <span>{{ progress_percent }}%</span>
+    </div>
+    <div class="progress" role="progressbar" aria-label="Прогресс теста"
+         aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" style="width: {{ progress_percent }}%"></div>
     </div>
 </div>
 
 <form method="post" action="{% url 'finish_test' %}">
     {% csrf_token %}
 
-    <div class="d-grid gap-4">
-        {% for q in questions %}
-            <section class="surface p-4 shadow-sm">
-                <div class="d-flex align-items-start gap-3 mb-3">
-                    <span class="badge rounded-pill text-bg-primary">{{ forloop.counter }}</span>
-                    <h2 class="h5 mb-0">{{ q.question }}</h2>
-                </div>
+    <section class="surface p-4 shadow-sm">
+        <div class="d-flex align-items-start gap-3 mb-3">
+            <span class="badge rounded-pill text-bg-primary">{{ question_number }}</span>
+            <h2 class="h5 mb-0">{{ question.question }}</h2>
+        </div>
 
-                <div class="row g-2">
-                    {% for answer in q.answers %}
-                        <div class="col-md-6">
-                            <label class="question-option d-flex gap-3 align-items-start p-3 h-100">
-                                <input class="form-check-input mt-1" type="radio"
-                                       name="question_{{ forloop.parentloop.counter0 }}"
-                                       value="{{ forloop.counter0 }}" required>
-                                <span>{{ answer }}</span>
-                            </label>
-                        </div>
-                    {% endfor %}
+        <div class="row g-2">
+            {% for option in question.options %}
+                <div class="col-md-6">
+                    <label class="question-option d-flex gap-3 align-items-start p-3 h-100">
+                        <input class="form-check-input mt-1" type="radio"
+                               name="question_{{ question_index }}"
+                               value="{{ option.index }}" required>
+                        <span>
+                            <span class="fw-semibold">{{ option.letter }}.</span>
+                            {{ option.text }}
+                        </span>
+                    </label>
                 </div>
-            </section>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    </section>
 
     <div class="surface p-4 mt-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <div>
-            <div class="fw-semibold">Готовы завершить?</div>
-            <div class="text-secondary small">После отправки агент проверит ответы и определит следующий уровень.</div>
+            <div class="fw-semibold">{% if is_last_question %}Готовы завершить?{% else %}Ответ сохранится после перехода{% endif %}</div>
+            <div class="text-secondary small">Правильный ответ будет учтен только в итоговом результате.</div>
         </div>
-        <button class="btn btn-success btn-lg" type="submit">Завершить тест</button>
+        <button class="btn btn-success btn-lg" type="submit">
+            {% if is_last_question %}Завершить тест{% else %}Следующий вопрос{% endif %}
+        </button>
     </div>
 </form>
 {% endblock %}

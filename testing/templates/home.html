@@ -7,39 +7,54 @@
     <div class="col-lg-5">
         <div class="mb-4">
             <span class="badge text-bg-primary mb-3">{{ topic_label }}</span>
-            <h1 class="display-6 fw-semibold mb-3">Тестирование по теме «ЯЗЫК DML»</h1>
+            <h1 class="display-6 fw-semibold mb-3">Адаптивное тестирование по теме «ЯЗЫК DML»</h1>
             <p class="lead text-secondary mb-0">
-                Первый тест всегда начинается с легкого уровня. После успешного результата агент переводит студента на следующий уровень.
+                Агент начинает с легкого уровня и переводит студента дальше только после успешного прохождения.
             </p>
         </div>
 
         <div class="surface p-4">
-            <h2 class="h5 mb-3">Лестница уровней</h2>
+            <h2 class="h5 mb-3">Правила тестирования</h2>
             <div class="d-grid gap-3">
                 <div class="d-flex gap-3">
-                    <span class="badge rounded-pill text-bg-success align-self-start">1</span>
+                    <span class="badge rounded-pill text-bg-primary align-self-start">15</span>
                     <div>
-                        <div class="fw-semibold">Легкий</div>
-                        <div class="text-secondary">Базовые команды SELECT, INSERT, UPDATE, DELETE.</div>
+                        <div class="fw-semibold">Вопросов в каждом тесте</div>
+                        <div class="text-secondary">Вопросы выдаются строго по одному.</div>
                     </div>
                 </div>
                 <div class="d-flex gap-3">
-                    <span class="badge rounded-pill text-bg-warning align-self-start">2</span>
+                    <span class="badge rounded-pill text-bg-success align-self-start">{{ passing_question_count }}</span>
                     <div>
-                        <div class="fw-semibold">Средний</div>
-                        <div class="text-secondary">Условия WHERE, группировка и безопасное изменение строк.</div>
+                        <div class="fw-semibold">Минимум правильных ответов</div>
+                        <div class="text-secondary">Для успешного прохождения нужно набрать не менее {{ pass_percent }}%.</div>
                     </div>
                 </div>
                 <div class="d-flex gap-3">
-                    <span class="badge rounded-pill text-bg-danger align-self-start">3</span>
+                    <span class="badge rounded-pill text-bg-secondary align-self-start">25</span>
                     <div>
-                        <div class="fw-semibold">Сложный</div>
-                        <div class="text-secondary">Подзапросы, транзакции и массовые DML-операции.</div>
+                        <div class="fw-semibold">Минут на первую попытку</div>
+                        <div class="text-secondary">На вторую попытку дается 20 минут, на третью — 15 минут.</div>
                     </div>
                 </div>
             </div>
-            <div class="alert alert-light border mt-4 mb-0">
-                Проходной порог для перехода дальше: {{ pass_percent }}%.
+        </div>
+
+        <div class="surface p-4 mt-4">
+            <h2 class="h5 mb-3">Лестница уровней</h2>
+            <div class="d-grid gap-3">
+                <div>
+                    <div class="fw-semibold">1. Легкий</div>
+                    <div class="text-secondary">Знание и понимание команд DML.</div>
+                </div>
+                <div>
+                    <div class="fw-semibold">2. Средний</div>
+                    <div class="text-secondary">Применение, анализ условий и поиск ошибок.</div>
+                </div>
+                <div>
+                    <div class="fw-semibold">3. Сложный</div>
+                    <div class="text-secondary">Подзапросы, транзакции и проектные DML-сценарии.</div>
+                </div>
             </div>
         </div>
     </div>
@@ -49,7 +64,7 @@
             <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
                 <div>
                     <h2 class="h4 mb-1">Начать тест</h2>
-                    <p class="text-secondary mb-0">Агент сам назначит уровень по вашей истории прохождения.</p>
+                    <p class="text-secondary mb-0">Введите данные. Уровень назначит агент по истории прохождения.</p>
                 </div>
                 <a class="btn btn-outline-secondary btn-sm" href="{% url 'statistics' %}">История</a>
             </div>

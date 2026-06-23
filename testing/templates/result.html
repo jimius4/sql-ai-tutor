@@ -6,7 +6,7 @@
 <div class="surface p-4 p-lg-5 mb-4">
     <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
         <div>
-            <h1 class="h3 mb-2">Результат тестирования</h1>
+            <h1 class="h3 mb-2">Тест завершен</h1>
             <p class="text-secondary mb-0">
                 {{ test_info.student_name }}, {{ test_info.group_name }}
                 {% if attempt %} · {{ attempt.created_at|date:"d.m.Y H:i" }}{% endif %}
@@ -14,39 +14,42 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             <span class="badge text-bg-light border">{{ test_info.topic_label }}</span>
-            <span class="badge text-bg-light border">{{ test_info.difficulty_label }}</span>
+            <span class="badge text-bg-light border">Уровень: {{ test_info.difficulty_label }}</span>
             <span class="badge text-bg-primary">{{ test_info.mode_label }}</span>
+            <span class="badge text-bg-secondary">Попытка {{ test_info.attempt_number }}</span>
         </div>
     </div>
 
     <div class="row g-3">
         <div class="col-md-3">
             <div class="surface metric p-3">
-                <div class="text-secondary small">Процент выполнения</div>
+                <div class="text-secondary small">% правильных</div>
                 <div class="display-6 fw-semibold">{{ result.score_percent }}%</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="surface metric p-3">
-                <div class="text-secondary small">Верных ответов</div>
+                <div class="text-secondary small">Правильных ответов</div>
                 <div class="display-6 fw-semibold text-success">{{ result.correct_count }}</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="surface metric p-3">
-                <div class="text-secondary small">Ошибок</div>
-                <div class="display-6 fw-semibold text-danger">{{ result.incorrect_count }}</div>
+                <div class="text-secondary small">Балл</div>
+                <div class="display-6 fw-semibold">
+                    {% if report.grade_points %}{{ report.grade_points }}{% else %}-{% endif %}
+                </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="surface metric p-3">
-                <div class="text-secondary small">Уровень знаний</div>
-                <div class="h3 fw-semibold mb-0">{{ report.level }}</div>
+                <div class="text-secondary small">Лучший результат</div>
+                <div class="display-6 fw-semibold">{{ best_score }}%</div>
             </div>
         </div>
     </div>
 
-    <div class="progress mt-4" role="progressbar" aria-label="Процент выполнения"
+    <div class="progress mt-4" role="progressbar" aria-label="Процент правильных ответов"
          aria-valuenow="{{ result.score_percent }}" aria-valuemin="0" aria-valuemax="100">
         <div class="progress-bar" style="width: {{ result.score_percent_width }}%"></div>
     </div>
@@ -55,19 +58,15 @@
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="surface p-4 h-100">
-            <h2 class="h5 mb-3">Рекомендации агента</h2>
+            <h2 class="h5 mb-3">Результат уровня</h2>
+            <p class="fs-5 fw-semibold mb-3">{{ report.level_result }}</p>
+
+            <h3 class="h6 mb-2">Рекомендации агента</h3>
             <ul class="list-group list-group-flush">
                 {% for item in report.recommendations %}
                     <li class="list-group-item px-0">{{ item }}</li>
                 {% endfor %}
             </ul>
-
-            <h3 class="h6 mt-4 mb-2">Темы для повторения</h3>
-            <div class="d-flex flex-wrap gap-2">
-                {% for topic in report.recommended_topics %}
-                    <span class="badge text-bg-light border">{{ topic }}</span>
-                {% endfor %}
-            </div>
         </div>
     </div>
 
@@ -75,50 +74,32 @@
         <div class="surface p-4 h-100">
             <h2 class="h5 mb-3">Следующий шаг</h2>
             <div class="mb-3">
-                <div class="text-secondary small">Следующая тема</div>
-                <div class="fw-semibold">{{ report.next_topic }}</div>
+                <div class="text-secondary small">Действие</div>
+                <div class="fw-semibold">{{ report.next_step }}</div>
             </div>
             <div class="mb-3">
-                <div class="text-secondary small">Практическое задание Northwind</div>
-                <div>{{ report.practical_task }}</div>
+                <div class="text-secondary small">Тема для повторения</div>
+                <div>{{ report.next_topic }}</div>
             </div>
             <div>
-                <div class="text-secondary small">Следующий тест</div>
-                <div class="fw-semibold">{{ report.questions_count }} вопросов</div>
+                <div class="text-secondary small">Практическое задание</div>
+                <div>{{ report.practical_task }}</div>
             </div>
         </div>
     </div>
 </div>
 
-{% if result.details %}
-    <div class="surface p-4 mt-4">
-        <h2 class="h5 mb-3">Разбор ответов</h2>
-        <div class="d-grid gap-3">
-            {% for detail in result.details %}
-                <div class="surface p-3 {% if detail.is_correct %}answer-correct{% else %}answer-wrong{% endif %}">
-                    <div class="d-flex justify-content-between gap-3 mb-2">
-                        <div class="fw-semibold">{{ detail.number }}. {{ detail.question }}</div>
-                        {% if detail.is_correct %}
-                            <span class="badge text-bg-success">Верно</span>
-                        {% else %}
-                            <span class="badge text-bg-danger">Ошибка</span>
-                        {% endif %}
-                    </div>
-                    <div class="small">
-                        <div><span class="text-secondary">Ваш ответ:</span> {{ detail.selected_answer }}</div>
-                        {% if not detail.is_correct %}
-                            <div><span class="text-secondary">Правильный ответ:</span> {{ detail.correct_answer }}</div>
-                        {% endif %}
-                        <div class="text-secondary mt-2">{{ detail.explanation }}</div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+<div class="surface p-4 mt-4">
+    <h2 class="h5 mb-3">Темы для подготовки</h2>
+    <div class="d-flex flex-wrap gap-2">
+        {% for topic in report.recommended_topics %}
+            <span class="badge text-bg-light border">{{ topic }}</span>
+        {% endfor %}
     </div>
-{% endif %}
+</div>
 
 <div class="d-flex flex-wrap gap-2 mt-4">
-    <a class="btn btn-primary" href="{% url 'home' %}">Пройти новый тест</a>
+    <a class="btn btn-primary" href="{% url 'home' %}">Продолжить тестирование</a>
     <a class="btn btn-outline-secondary" href="{% url 'statistics' %}">Открыть статистику</a>
 </div>
 {% endblock %}
