@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.db.models import Avg, Count, Max
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .agent import SQLTutorAgent
 from .forms import StartTestForm
-from .models import TestAttempt
+from .models import TestAnswer, TestAttempt
 from .question_generator import (
     DIFFICULTY_LABELS,
     TOPIC_DML,
@@ -66,6 +67,7 @@ def home(request):
                     "current_index": 0,
                     "attempt_number": attempt_number,
                     "duration_minutes": agent_plan["duration_minutes"],
+                    "started_at": timezone.now().timestamp(),
                     "pass_percent": agent.PASS_PERCENT,
                     "passing_question_count": agent.passing_question_count,
                 }
@@ -97,6 +99,9 @@ def finish_test(request):
         return redirect("home")
 
     current_index = int(test_info.get("current_index", 0))
+    if _remaining_seconds(test_info) <= 0:
+        return _finalize_test(request, questions, test_info)
+
     answer_value = request.POST.get(f"question_{current_index}")
 
     if answer_value is None:
@@ -112,6 +117,11 @@ def finish_test(request):
         request.session["current_test"] = test_info
         return _render_current_question(request)
 
+    return _finalize_test(request, questions, test_info)
+
+
+def _finalize_test(request, questions, test_info):
+    current_answers = request.session.get("current_answers", {})
     result = check_answers(current_answers, questions)
     agent = SQLTutorAgent()
     report = agent.create_learning_report(
@@ -120,21 +130,39 @@ def finish_test(request):
         attempt_number=test_info["attempt_number"],
     )
 
+    previous_best = (
+        TestAttempt.objects.filter(
+            student_name__iexact=test_info["student_name"],
+            group_name__iexact=test_info["group_name"],
+            topic=test_info["topic"],
+        ).aggregate(value=Max("best_score"))["value"]
+        or 0
+    )
+    best_score = max(previous_best, result["score_percent"])
+
     attempt = TestAttempt.objects.create(
         student_name=test_info["student_name"],
         group_name=test_info["group_name"],
         topic=test_info["topic"],
         difficulty=test_info["difficulty"],
         score=result["score_percent"],
+        best_score=best_score,
         level=report["level"],
+        attempt_number=test_info["attempt_number"],
+        duration_minutes=test_info["duration_minutes"],
     )
-    best_score = (
-        TestAttempt.objects.filter(
-            student_name__iexact=test_info["student_name"],
-            group_name__iexact=test_info["group_name"],
-            topic=test_info["topic"],
-        ).aggregate(value=Max("score"))["value"]
-        or result["score_percent"]
+
+    TestAnswer.objects.bulk_create(
+        [
+            TestAnswer(
+                attempt=attempt,
+                question_number=detail["number"],
+                question_text=detail["question"],
+                selected_answer_index=detail["selected_index"],
+                is_correct=detail["is_correct"],
+            )
+            for detail in result["details"]
+        ]
     )
 
     request.session.pop("current_questions", None)
@@ -228,6 +256,15 @@ def _render_current_question(request):
             "question_number": current_index + 1,
             "is_last_question": current_index + 1 == len(questions),
             "progress_percent": round(((current_index + 1) / len(questions)) * 100, 1),
+            "progress_percent_width": str(round(((current_index + 1) / len(questions)) * 100, 1)),
+            "remaining_seconds": _remaining_seconds(test_info),
             "test_info": test_info,
         },
     )
+
+
+def _remaining_seconds(test_info):
+    started_at = float(test_info.get("started_at", timezone.now().timestamp()))
+    duration_seconds = int(test_info.get("duration_minutes", 25)) * 60
+    elapsed_seconds = int(timezone.now().timestamp() - started_at)
+    return max(duration_seconds - elapsed_seconds, 0)

@@ -6,7 +6,7 @@
 <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
     <div>
         <h1 class="h3 mb-2">Статистика тестирования</h1>
-        <p class="text-secondary mb-0">История попыток сохраняется локально в базе SQLite через Django ORM.</p>
+        <p class="text-secondary mb-0">История попыток и лучший результат сохраняются локально через Django ORM.</p>
     </div>
     <a class="btn btn-primary align-self-lg-start" href="{% url 'home' %}">Новый тест</a>
 </div>
@@ -62,10 +62,10 @@
                             <th>Дата</th>
                             <th>Студент</th>
                             <th>Группа</th>
-                            <th>Тема</th>
-                            <th>Сложность</th>
-                            <th>Балл</th>
                             <th>Уровень</th>
+                            <th>Попытка</th>
+                            <th>Результат</th>
+                            <th>Лучший</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -74,10 +74,10 @@
                                 <td>{{ attempt.created_at|date:"d.m.Y H:i" }}</td>
                                 <td>{{ attempt.student_name }}</td>
                                 <td>{{ attempt.group_name }}</td>
-                                <td>{{ attempt.get_topic_display }}</td>
                                 <td>{{ attempt.get_difficulty_display }}</td>
+                                <td>{{ attempt.attempt_number }}</td>
                                 <td class="fw-semibold">{{ attempt.score }}%</td>
-                                <td>{{ attempt.level }}</td>
+                                <td class="fw-semibold">{{ attempt.best_score }}%</td>
                             </tr>
                         {% endfor %}
                         </tbody>

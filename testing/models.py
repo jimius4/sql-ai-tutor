@@ -47,7 +47,10 @@ class TestAttempt(models.Model):
     topic = models.CharField(max_length=50, choices=TOPIC_CHOICES)
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
     score = models.FloatField()
+    best_score = models.FloatField(default=0)
     level = models.CharField(max_length=20)
+    attempt_number = models.PositiveIntegerField(default=1)
+    duration_minutes = models.PositiveIntegerField(default=25)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -55,3 +58,21 @@ class TestAttempt(models.Model):
 
     def __str__(self):
         return f"{self.student_name} - {self.score}%"
+
+
+class TestAnswer(models.Model):
+    attempt = models.ForeignKey(
+        TestAttempt,
+        on_delete=models.CASCADE,
+        related_name="answers",
+    )
+    question_number = models.PositiveIntegerField()
+    question_text = models.TextField()
+    selected_answer_index = models.PositiveIntegerField(null=True, blank=True)
+    is_correct = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["question_number"]
+
+    def __str__(self):
+        return f"{self.attempt.student_name}: вопрос {self.question_number}"

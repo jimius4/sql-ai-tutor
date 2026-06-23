@@ -3,7 +3,7 @@ from django import forms
 
 class StartTestForm(forms.Form):
     full_name = forms.CharField(
-        label="ФИО",
+        label="Фамилия Имя Отчество",
         max_length=255,
         widget=forms.TextInput(
             attrs={

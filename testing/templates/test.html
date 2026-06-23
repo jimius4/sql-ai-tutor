@@ -16,7 +16,7 @@
             <span class="badge text-bg-light border">Уровень: {{ test_info.difficulty_label }}</span>
             <span class="badge text-bg-primary">{{ test_info.mode_label }}</span>
             <span class="badge text-bg-secondary">Попытка {{ test_info.attempt_number }}</span>
-            <span class="badge text-bg-secondary">{{ test_info.duration_minutes }} минут</span>
+            <span class="badge text-bg-secondary">Осталось: <span id="timer">--:--</span></span>
         </div>
     </div>
 
@@ -32,7 +32,7 @@
     </div>
     <div class="progress" role="progressbar" aria-label="Прогресс теста"
          aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-bar" style="width: {{ progress_percent }}%"></div>
+        <div class="progress-bar" style="width: {{ progress_percent_width }}%"></div>
     </div>
 </div>
 
@@ -72,4 +72,31 @@
         </button>
     </div>
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const timerElement = document.getElementById("timer");
+    let remainingSeconds = Number("{{ remaining_seconds }}");
+
+    function renderTimer() {
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        timerElement.textContent = `${minutes}:${String(seconds).padStart(2, "0")}`;
+
+        if (remainingSeconds <= 0) {
+            timerElement.textContent = "0:00";
+            const form = document.querySelector("form");
+            if (form) {
+                form.submit();
+            }
+            return;
+        }
+
+        remainingSeconds -= 1;
+        window.setTimeout(renderTimer, 1000);
+    }
+
+    renderTimer();
+</script>
 {% endblock %}
